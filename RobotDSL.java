@@ -103,27 +103,14 @@ class Prim_com {
       ct.toNext();
       if (ct.match("sw")) {
         // TODO: swの処理を考える
-      } else if (ct.match("[+-]?[0-9]+(.[0-9]+)?")) {
+      } else {
         // 数字を記録
         fnum1 = new Fnum();
         fnum1.parse(ct);
-        if (ct.match("[+-]?[0-9]+(.[0-9]+)?")) {
-          fnum2 = new Fnum();
-          fnum2.parse(ct);
-        } else {
-          System.out.println("無効な構文です: " + ct.currentToken());
-          System.exit(0); // 終了
-        }
-        if (ct.match("[+-]?[0-9]+(.[0-9]+)?")) {
-          fnum3 = new Fnum();
-          fnum3.parse(ct);
-        } else {
-          System.out.println("無効な構文です: " + ct.currentToken());
-          System.exit(0); // 終了
-        }
-      } else {
-        System.out.println("無効な構文です: " + ct.currentToken());
-        System.exit(0); // 終了
+        fnum2 = new Fnum();
+        fnum2.parse(ct);
+        fnum3 = new Fnum();
+        fnum3.parse(ct);
       }
     }
   }
@@ -148,7 +135,7 @@ class Fnum {
     }
   }
 
-  public void exe() {
-    // エグゼキュータ
+  public double exe() {
+    return val;
   }
 }
