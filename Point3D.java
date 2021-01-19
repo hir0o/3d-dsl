@@ -1,6 +1,6 @@
 
 class Point3D {
-	double x, y, z;
+  double x, y, z;
 	Point3D(double _x, double _y, double _z) {//コンストラクタ
 		x = _x; y = _y; z = _z;
 	}
