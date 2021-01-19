@@ -1,0 +1,12 @@
+repeat {
+  move 10 36 0
+  repeat {
+    walk 0 12 0
+    walk 0 0 10
+  } 60
+  repeat {
+    walk 0 -12 0
+    walk 0 0 -10
+  } 60
+  move 0 0 5
+} 10

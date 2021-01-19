@@ -1,8 +1,9 @@
 
 class Point3D {
-	double x, y, z;
-	Point3D(double _x, double _y, double _z) {//コンストラクタ
-		x = _x; y = _y; z = _z;
+  double x, y, z;
+  boolean is_draw, sw_draw;
+	Point3D(double _x, double _y, double _z, boolean _is_draw, boolean _sw_draw) {//コンストラクタ
+		x = _x; y = _y; z = _z; is_draw = _is_draw; sw_draw = _sw_draw;
 	}
 	double get_2Dx(double alpha, double beta, int px, int py) {//正射影変換により画面上のX座標を求める
 		final double D2Rad = Math.PI/180.0; //度からラジアンへの変換定数（finalをつけると，値の変更のできない定数となる）

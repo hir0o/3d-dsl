@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 public class RobotDSL {
   public static void main(String[] args) {
-    Path path = Paths.get("text.txt");// 読み込むファイルを指定
+    Path path = Paths.get("text2.txt");// 読み込むファイルを指定
     List<String> allLines = null;// ファイルの内容を行ごどに格納するリスト
     String delim = " ,¥n"; // 単語の区切り記号
     String allText = "";// 全行を連結した文字列（初期値は長さ0の文字列""）
@@ -84,6 +84,7 @@ class Com_List {
 
     // 後ろに語句がない場合は処理を終了
     if (ct.currentToken() == null) return;
+
     if (ct.match("walk") || ct.match("move") || ct.match("repeat")) {
       clist = new Com_List();
       clist.parse(ct);
@@ -120,15 +121,15 @@ class Rep_com {
           inum = Integer.parseInt(ct.currentToken());
           ct.toNext();
         } else {
-          System.out.println("Rep_com2: 数字を期待する " + ct.currentToken());
+          System.out.println("Rep_com: 数字を期待します。 " + ct.currentToken());
           System.exit(0);
         }
       } else {
-        System.out.println("閉じカッコがありません。 " + ct.currentToken());
+        System.out.println("Rep_com: } がありません。 " + ct.currentToken());
         System.exit(0);
       }
     } else {
-      System.out.println("Rep_com1: 無効な構文です " + ct.currentToken());
+      System.out.println("Rep_com: 無効な構文です。 " + ct.currentToken());
       System.exit(0);
     }
   }
@@ -145,25 +146,26 @@ class Prim_com {
   String op;
   Fnum fnum1, fnum2, fnum3; // 各命令の引数
   double x, y, z; // 座標を格納
-
+  boolean is_draw, sw_draw;
   public void parse(Context ct) {
     op = ct.currentToken(); // 命令の種類（"walk"，”move”）をop に記録
     if (ct.match("walk")) { // walkだった場合(線を引く)
       ct.toNext();
       if (ct.match("sw")) {
-        // TODO: swの処理を考える
+        sw_draw = true; // 描写フラグ
         ct.toNext();
-      } else {
-        // 数字を記録
-        fnum1 = new Fnum();
-        fnum1.parse(ct);
-        fnum2 = new Fnum();
-        fnum2.parse(ct);
-        fnum3 = new Fnum();
-        fnum3.parse(ct);
       }
+      is_draw = true;  // 描写フラグ
+      // 数字を記録
+      fnum1 = new Fnum();
+      fnum1.parse(ct);
+      fnum2 = new Fnum();
+      fnum2.parse(ct);
+      fnum3 = new Fnum();
+      fnum3.parse(ct);
     } else if (ct.match("move")) { // moveだった場合(移動のみを行う。)
       ct.toNext();
+      is_draw = false;
       fnum1 = new Fnum();
       fnum1.parse(ct);
       fnum2 = new Fnum();
@@ -178,11 +180,9 @@ class Prim_com {
     // op に記録されている命令の種類に応じて処理を行う
     // TODO: 移動する座標を作成?
     if(op.equals("walk")) {
-      data.makeData(fnum1.exe(), fnum2.exe(), fnum3.exe());
-      // System.out.println(fnum1.exe() + " " + fnum2.exe() + " " + fnum3.exe());
+      data.makeData(fnum1.exe(), fnum2.exe(), fnum3.exe(), is_draw, sw_draw);
     } else if(op.equals("move")) {
-      data.makeData(fnum1.exe(), fnum2.exe(), fnum3.exe());
-      // System.out.println(fnum1.exe() + " " + fnum2.exe() + " " + fnum3.exe());
+      data.makeData(fnum1.exe(), fnum2.exe(), fnum3.exe(), false, false);
     }
   }
 }
@@ -238,9 +238,10 @@ class Data {
   double s_r = 0, s_ang = 0, s_y = 0;
   double ang = 0;
   double x, z;
-  final double rad = Math.PI/180.0; //度からラジアンへの変換定数
+  final double RAD = Math.PI/180.0; //度からラジアンへの変換定数
+  boolean draw_flag = true;
 
-  void makeData(double r, double ang, double y) {
+  void makeData(double r, double ang, double y, boolean is_draw, boolean sw_draw) {
     // 変数を保存
     s_r += r;     // 半径
     s_ang += ang; // 角度
@@ -253,11 +254,11 @@ class Data {
       s_ang += 360;
 
     // x,z座標の計算
-    x =  s_r*Math.sin(s_ang*rad); // ! そもそもここが怪しい？
-    z =  s_r*Math.cos(s_ang*rad);
-    System.out.printf("s_ang: %f, s_r: %f \n", s_ang,s_r);
-    System.out.printf("x: %f, y: %f, z: %f \n", x,s_y,z);
-    alist.add(new Point3D(x, s_y, z));
+    x =  s_r*Math.sin(s_ang*RAD);
+    z =  s_r*Math.cos(s_ang*RAD);
+    // System.out.printf("s_ang: %f, s_r: %f \n", s_ang,s_r);
+    // System.out.printf("x: %f, y: %f, z: %f \n", x,s_y,z);
+    alist.add(new Point3D(x, s_y, z, is_draw, sw_draw));
   }
 
   void addCanvas(Canvas arg) { // MyCanvasオブジェクトを登録
@@ -281,8 +282,13 @@ class Data {
       y2d = p.get_2Dy(alpha, beta, px, py);
       dx = (int) Math.rint(x2d);// x2dの値を四捨五入してdxに代入
       dy = (int) Math.rint(y2d);// y2dの値を四捨五入してdyに代入
+
+      if(p.sw_draw)
+        draw_flag = !draw_flag;
       if (i++ > 0) {// 2回目以降のループだったら1つ前の点との間に線を引く
-        g.drawLine(_dx, _dy, dx, dy);
+        if (p.is_draw && draw_flag) {
+          g.drawLine(_dx, _dy, dx, dy);
+        }
       }
       _dx = dx;// 1つ前の座標を更新
       _dy = dy;
