@@ -24,22 +24,22 @@ public class RobotDSL {
     Context ct = new Context(allText, delim);// Contextオブジェクトの作成
     Prog prog = new Prog();// パーサオブジェクトを作る
 
-    prog.parse(ct);// progに構文解析を指示（パーサメソッドを実行させる）
-
     // 描写
     Data data = new Data(); // データオブジェクトを作る
     JFrame jf = new JFrame("Canvas"); // フレームオブジェクトを作る
     Canvas mc = new Canvas(); // キャンバスオブジェクトを作る
 
+    prog.parse(ct);// progに構文解析を指示（パーサメソッドを実行させる）
+    prog.exe(data);
+
     jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // クローズボタンで終了するように設定
-    mc.setPreferredSize(new Dimension(700, 700)); // キャンバスのサイズを設定
+    mc.setPreferredSize(new Dimension(1200, 1200)); // キャンバスのサイズを設定
     jf.getContentPane().add(mc); // フレームにキャンバスを貼り付け
     jf.pack(); // フレームの大きさを自動調整
     data.addCanvas(mc); // データオブジェクトにキャンバスオブジェクトを登録
     data.notifyToCanvas(); // データ準備完了をキャンパスオブジェクトに通知するよう，データオブジェクトに依頼
     jf.setVisible(true); // PC画面へ表示
 
-    prog.exe(data);
   }
 }
 
@@ -178,10 +178,11 @@ class Prim_com {
     // op に記録されている命令の種類に応じて処理を行う
     // TODO: 移動する座標を作成?
     if(op.equals("walk")) {
-      // data.makeData(fnum1.exe(), fnum2.exe(), fnum3.exe());
-      System.out.println(fnum1.exe() + " " + fnum2.exe() + " " + fnum3.exe());
+      data.makeData(fnum1.exe(), fnum2.exe(), fnum3.exe());
+      // System.out.println(fnum1.exe() + " " + fnum2.exe() + " " + fnum3.exe());
     } else if(op.equals("move")) {
-      System.out.println(fnum1.exe() + " " + fnum2.exe() + " " + fnum3.exe());
+      data.makeData(fnum1.exe(), fnum2.exe(), fnum3.exe());
+      // System.out.println(fnum1.exe() + " " + fnum2.exe() + " " + fnum3.exe());
     }
   }
 }
@@ -211,8 +212,8 @@ class Fnum {
 class Canvas extends JPanel {
   // データ
   Data data = null; // データオブジェクト（表示するデータを持つオブジェクト）の名前
-  double alpha = 45; // X軸回り回転角（α）
-  double beta = 45; // Y軸回り回転角（β）
+  double alpha = 30; // X軸回り回転角（α）
+  double beta = 30; // Y軸回り回転角（β）
   int doX, doY; // マウスの移動距離を測る
 
   // 関数（メソッド）群
@@ -234,10 +235,29 @@ class Data {
   // データ
   ArrayList<Point3D> alist = new ArrayList<Point3D>(); // 3次元座標列を格納する配列
   Canvas canvas = null; // データを表示するCanvasオブジェクト（の名前）
+  double s_r = 0, s_ang = 0, s_y = 0;
+  double ang = 0;
+  double x, z;
+  final double rad = Math.PI/180.0; //度からラジアンへの変換定数
 
+  void makeData(double r, double ang, double y) {
+    // 変数を保存
+    s_r += r;     // 半径
+    s_ang += ang; // 角度
+    s_y += y;     // 高さ
 
-  void makeData(double x, double y, double z) {
-    alist.add(new Point3D(x, y, z));
+    // 360を超えないようにする
+    if(s_ang > 360)
+      s_ang -= 360;
+    if(s_ang < -360)
+      s_ang += 360;
+
+    // x,z座標の計算
+    x =  s_r*Math.sin(s_ang*rad); // ! そもそもここが怪しい？
+    z =  s_r*Math.cos(s_ang*rad);
+    System.out.printf("s_ang: %f, s_r: %f \n", s_ang,s_r);
+    System.out.printf("x: %f, y: %f, z: %f \n", x,s_y,z);
+    alist.add(new Point3D(x, s_y, z));
   }
 
   void addCanvas(Canvas arg) { // MyCanvasオブジェクトを登録
@@ -256,7 +276,7 @@ class Data {
     int N = alist.size();// alistの要素数を得る
     g.setColor(Color.cyan);// 描画色をシアンにセット
     for (Point3D p : alist) {
-      /* 完成させよ */
+
       x2d = p.get_2Dx(alpha, beta, px, py);// 画面上の座標を求める
       y2d = p.get_2Dy(alpha, beta, px, py);
       dx = (int) Math.rint(x2d);// x2dの値を四捨五入してdxに代入
