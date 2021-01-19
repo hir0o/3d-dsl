@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 
 public class RobotDSL {
   public static void main(String[] args) {
-    Path path = Paths.get("text2.txt");// 読み込むファイルを指定
+    Path path = Paths.get("text.txt");// 読み込むファイルを指定
     List<String> allLines = null;// ファイルの内容を行ごどに格納するリスト
     String delim = " ,¥n"; // 単語の区切り記号
     String allText = "";// 全行を連結した文字列（初期値は長さ0の文字列""）
@@ -47,7 +47,6 @@ public class RobotDSL {
 // * （3）Rep_com → repeat { Com_list } [0-9]+
 // * （4）Prim_com → walk sw? Fnum Fnum Fnum
 // * | move Fnum Fnum Fnum
-// * | reset
 // * （5）Fnum → [+-]?[0-9]+(.[0-9]+)?
 
 // * (1)Prog -> Com_list

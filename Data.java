@@ -5,7 +5,7 @@ class Data {
   // データ
   ArrayList<FlagPoint3D> alist = new ArrayList<FlagPoint3D>(); // 3次元座標列を格納する配列
   Canvas canvas = null; // データを表示するCanvasオブジェクト（の名前）
-  double s_r = 0, s_ang = 0, s_y = -700;
+  double s_r = 0, s_ang = 0, s_y = 0;
   double ang = 0;
   double x, z;
   final double RAD = Math.PI/180.0; //度からラジアンへの変換定数
