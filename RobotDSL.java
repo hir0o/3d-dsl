@@ -1,5 +1,4 @@
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 import java.util.*;
 import java.util.List;
@@ -48,6 +47,7 @@ public class RobotDSL {
 // * （3）Rep_com → repeat { Com_list } [0-9]+
 // * （4）Prim_com → walk sw? Fnum Fnum Fnum
 // * | move Fnum Fnum Fnum
+// * | reset
 // * （5）Fnum → [+-]?[0-9]+(.[0-9]+)?
 
 // * (1)Prog -> Com_list
@@ -92,7 +92,6 @@ class Com_List {
   }
 
   void exe(Data data) {
-    // TODO: エグゼキュータ
     if(pcom != null)
       pcom.exe(data);
     if(rcom != null)
@@ -176,9 +175,6 @@ class Prim_com {
   }
 
   void exe(Data data) {
-    // エグゼキュータ
-    // op に記録されている命令の種類に応じて処理を行う
-    // TODO: 移動する座標を作成?
     if(op.equals("walk")) {
       data.makeData(fnum1.exe(), fnum2.exe(), fnum3.exe(), is_draw, sw_draw);
     } else if(op.equals("move")) {
@@ -194,7 +190,6 @@ class Fnum {
   public void parse(Context ct) {
     if (ct.currentToken() != null && ct.currentToken().matches("[+-]?[0-9]+(.[0-9]+)?")) {
       val = Double.parseDouble(ct.currentToken());
-      // System.out.println(ct.currentToken());
       ct.toNext(); // 次のトークンに進む
     } else {
       System.out.println("Num: 数字ではありません: " + ct.currentToken());
@@ -204,94 +199,5 @@ class Fnum {
 
   public double exe() {
     return val;
-  }
-}
-
-//  - - - - - - - 以下描写用のClass - - - - - - - -
-
-class Canvas extends JPanel {
-  // データ
-  Data data = null; // データオブジェクト（表示するデータを持つオブジェクト）の名前
-  double alpha = 30; // X軸回り回転角（α）
-  double beta = 30; // Y軸回り回転角（β）
-  int doX, doY; // マウスの移動距離を測る
-
-  // 関数（メソッド）群
-  public void paintComponent(Graphics g) {
-    super.paintComponent(g); // 親クラスのpaintメソッドを呼出す
-    setBackground(Color.black); // 背景色を黒にセット
-
-    data.drawData(alpha, beta, getWidth() / 2, getHeight() / 2, g); // データオブジェクトに表示を依頼
-    // getWith(),getHeight()はそれぞれ，そのときのmcの横，縦のピクセル数を返す
-  }
-
-  void update(Data arg) { // データの準備完了時や，データの変化時に呼ばれる（引数はデータオブジェクト自身（の先頭アドレス））
-    data = arg; // dataにデータオブジェクトの先頭アドレスを代入
-    repaint(); // 表示を更新
-  }
-}
-
-class Data {
-  // データ
-  ArrayList<Point3D> alist = new ArrayList<Point3D>(); // 3次元座標列を格納する配列
-  Canvas canvas = null; // データを表示するCanvasオブジェクト（の名前）
-  double s_r = 0, s_ang = 0, s_y = 0;
-  double ang = 0;
-  double x, z;
-  final double RAD = Math.PI/180.0; //度からラジアンへの変換定数
-  boolean draw_flag = true;
-
-  void makeData(double r, double ang, double y, boolean is_draw, boolean sw_draw) {
-    // 変数を保存
-    s_r += r;     // 半径
-    s_ang += ang; // 角度
-    s_y += y;     // 高さ
-
-    // 360を超えないようにする
-    if(s_ang > 360)
-      s_ang -= 360;
-    if(s_ang < -360)
-      s_ang += 360;
-
-    // x,z座標の計算
-    x =  s_r*Math.sin(s_ang*RAD);
-    z =  s_r*Math.cos(s_ang*RAD);
-    // System.out.printf("s_ang: %f, s_r: %f \n", s_ang,s_r);
-    // System.out.printf("x: %f, y: %f, z: %f \n", x,s_y,z);
-    alist.add(new Point3D(x, s_y, z, is_draw, sw_draw));
-  }
-
-  void addCanvas(Canvas arg) { // MyCanvasオブジェクトを登録
-    canvas = arg;
-  }
-
-  void notifyToCanvas() { // Canvasオブジェクトにデータの準備完了（あるいは更新完了）を通知
-    canvas.update(this); // 自分自身を引数として渡す（thisはDataオブジェクト自身を表す）
-  }
-
-  // alistからPoint3Dオブジェクトを順に取出し，2D画面座標へ変換し線で結んで図形を表示するメソッド（関数）
-  void drawData(double alpha, double beta, int px, int py, Graphics g) {
-    double x2d = 0, y2d = 0;// 2D画面座標
-    int _dx = 0, _dy = 0, dx = 0, dy = 0;// 線で結ぶ点の2D座標．(_dx,_dy)が一つ前の点，(dx,dy)が現在の点
-    int i = 0; // 何回目のループか数えるための変数
-    int N = alist.size();// alistの要素数を得る
-    g.setColor(Color.cyan);// 描画色をシアンにセット
-    for (Point3D p : alist) {
-
-      x2d = p.get_2Dx(alpha, beta, px, py);// 画面上の座標を求める
-      y2d = p.get_2Dy(alpha, beta, px, py);
-      dx = (int) Math.rint(x2d);// x2dの値を四捨五入してdxに代入
-      dy = (int) Math.rint(y2d);// y2dの値を四捨五入してdyに代入
-
-      if(p.sw_draw)
-        draw_flag = !draw_flag;
-      if (i++ > 0) {// 2回目以降のループだったら1つ前の点との間に線を引く
-        if (p.is_draw && draw_flag) {
-          g.drawLine(_dx, _dy, dx, dy);
-        }
-      }
-      _dx = dx;// 1つ前の座標を更新
-      _dy = dy;
-    }
   }
 }
