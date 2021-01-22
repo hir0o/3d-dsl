@@ -46,6 +46,8 @@ repeat {
 } 40
 ```
 
+<img width="1173" alt="スクリーンショット 2021-01-22 9 38 30" src="https://user-images.githubusercontent.com/44374005/105430093-17424180-5c96-11eb-8905-5571c63019eb.png">
+
 ```
 move 200 0 -300
 repeat {
@@ -59,6 +61,8 @@ repeat {
   } 1800
 } 2
 ```
+
+<img width="1195" alt="スクリーンショット 2021-01-22 9 36 40" src="https://user-images.githubusercontent.com/44374005/105430043-fbd73680-5c95-11eb-820f-2f86a1e25604.png">
 
 ```
 repeat {
@@ -74,3 +78,5 @@ repeat {
   move 0 0 5
 } 10
 ```
+
+<img width="1191" alt="スクリーンショット 2021-01-22 9 36 03" src="https://user-images.githubusercontent.com/44374005/105430105-20331300-5c96-11eb-8c19-abd6168ab483.png">
