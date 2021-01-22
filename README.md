@@ -45,10 +45,11 @@ repeat {
   move 0.4 3.6 1.0
 } 40
 ```
-<img width="1191" alt="スクリーンショット 2021-01-22 9 36 03" src="https://user-images.githubusercontent.com/44374005/105430105-20331300-5c96-11eb-8c19-abd6168ab483.png">
 
+<img width="1191" alt="スクリーンショット 2021-01-22 9 36 03" src="https://user-images.githubusercontent.com/44374005/105430105-20331300-5c96-11eb-8c19-abd6168ab483.png">
 <br>
 <br>
+
 ```
 move 200 0 -300
 repeat {
@@ -66,6 +67,7 @@ repeat {
 <img width="1195" alt="スクリーンショット 2021-01-22 9 36 40" src="https://user-images.githubusercontent.com/44374005/105430043-fbd73680-5c95-11eb-820f-2f86a1e25604.png">
 <br>
 <br>
+
 ```
 repeat {
   move 10 36 0
